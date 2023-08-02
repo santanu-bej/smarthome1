@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>All Switches</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .toggle-btn {
+            cursor: pointer;
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            text-align: center;
+        }
+
+        .on {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .off {
+            background-color: #f44336;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>All Switches</h1>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Switch Name</th>
+            <th>Switch Status</th>
+        </tr>
+        {% for switch in switches %}
+        <tr>
+            <td>{{ switch.id }}</td>
+            <td>{{ switch.switch_name }}</td>
+            <td>
+                <div class="toggle-btn {% if switch.switch_status %}on{% else %}off{% endif %}" onclick="toggleSwitch('{{ switch.switch_name }}', '{{ switch.switch_status }}')" data-switch-name="{{ switch.switch_name}}">
+                    {% if switch.switch_status %}ON{% else %}OFF{% endif %}
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <script>
+        function toggleSwitch(switchName, currentStatus) {
+            
+            const newStatus = currentStatus == 'True'? 'False':'True'; // Toggle the status (True to False and False to True)
+            const url = `/api/switches/set/${switchName}?status=${newStatus}`;
+            const newStatusbool = newStatus=='True'? true : false;
+            // Send a GET request to update the switch status in the database
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    // Update the button text and class based on the new status
+                    const toggleBtn = document.querySelector(`.toggle-btn[data-switch-name="${switchName}"]`);
+                    toggleBtn.innerText = newStatusbool ? "ON" : "OFF";
+                    toggleBtn.classList.toggle('on', newStatusbool);
+                    toggleBtn.classList.toggle('off', !newStatusbool);
+                })
+                .catch(error => console.error('Error:', error));
+            location.reload();
+        }
+    </script>
+</body>
+</html>
